@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RomCom - Find Your Perfect Romance Movie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffd2d2 0%, #ffe5e5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            height: 80px;
+            width: 100%;
+            background: linear-gradient(135deg, #da969b);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 55px;
+            width: 55px;
+            border-radius: 50%;
+            margin-right: auto;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 3px solid white;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            margin-left: auto;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #fffcfb;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: white;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn:hover::after {
+            width: 100%;
+        }
+
+        .container {
+            flex: 1;
+            padding: 50px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            color: rgb(112, 109, 109);
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            color: rgb(150, 130, 130);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .movies-carousel {
+            position: relative;
+            margin-bottom: 50px;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 20px;
+        }
+
+        .carousel-title {
+            color: rgb(112, 109, 109);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+            gap: 15px;
+            padding: 10px;
+            background: linear-gradient(135deg, #f5e6e6 0%, #faebd7 100%);
+            border-radius: 10px;
+        }
+
+        .carousel-item {
+            flex: 0 0 calc(100% / 4);
+            min-width: 200px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .movie-poster {
+            width: 180px;
+            height: 260px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .movie-poster:hover {
+            transform: scale(1.05) translateY(-10px);
+            box-shadow: 0 10px 30px rgba(218, 150, 155, 0.4);
+            border-color: #da969b;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(218, 150, 155, 0.8);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(218, 150, 155, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-btn.prev {
+            left: 10px;
+        }
+
+        .carousel-btn.next {
+            right: 10px;
+        }
+
+        .about-section {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .about-section h2 {
+            color: rgb(112, 109, 109);
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .about-section p {
+            color: rgb(150, 130, 130);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #da969b 0%, #c97f7f 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(218, 150, 155, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0d9d9;
+            color: #8b6d6d;
+            border: 2px solid #da969b;
+        }
+
+        .btn-secondary:hover {
+            background: #e8c5c5;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .carousel-item {
+                flex: 0 0 calc(100% / 2);
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .carousel-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .carousel-item {
+                flex: 0 0 100%;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .nav-btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <img class="logo" src="logo.png" alt="Logo">
+        <div class="nav-links">
+            <a href="signup.html" class="nav-btn">Signup</a>
+            <a href="login.html" class="nav-btn">Login</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="hero-section">
+            <h1>🎬 RomCom - Your Perfect Romance Movie Guide</h1>
+            <p class="subtitle">Discover your next favorite romance movie</p>
+        </div>
+
+        <div class="movies-carousel">
+            <div class="carousel-title">Featured Movies</div>
+            <div class="carousel-container">
+                <button class="carousel-btn prev" onclick="scrollCarousel(-1)">❮</button>
+                <div class="carousel-track" id="carouselTrack">
+                    <!-- Movie posters will be added here -->
+                </div>
+                <button class="carousel-btn next" onclick="scrollCarousel(1)">❯</button>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2>About RomCom</h2>
+            <p>
+                RomCom is your ultimate destination for finding the perfect romance movie. 
+                Signup to create your profile and get personalized recommendations based on your favorite 
+                romance tropes. Discover hidden gems, save your favorites, and explore a curated collection 
+                of the best romance comedies out there.
+            </p>
+            <div class="cta-buttons">
+                <a href="signup.html" class="btn btn-primary">Get Started - Signup</a>
+                <a href="login.html" class="btn btn-secondary">Already a Member? Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const movies = [
+            { title: "Proposal", poster: "movie1.jpg" },
+            { title: "You've Got Mail", poster: "movie1.jpg"},
+            { title: "When Harry Met Sally", poster: "movie1.jpg" },
+            { title: "Crazy, Stupid, Love", poster: "movie1.jpg" },
+            { title: "Notting Hill", poster:"movie1.jpg" },
+            { title: "10 Things I Hate", poster:"movie1.jpg" },
+            { title: "Legally Blonde", poster:  "movie1.jpg"},
+            { title: "The Princess Bride", poster: "https://via.placeholder.com/180x260/da969b/ffffff?text=Princess+Bride" },
+            { title: "Bridget Jones", poster: "https://via.placeholder.com/180x260/da969b/ffffff?text=Bridget+Jones" },
+            { title: "Love Actually", poster: "https://via.placeholder.com/180x260/da969b/ffffff?text=Love+Actually" },
+            { title: "Sleepless in Seattle", poster: "https://via.placeholder.com/180x260/da969b/ffffff?text=Sleepless" },
+            { title: "My Best Friend's Wedding", poster: "https://via.placeholder.com/180x260/da969b/ffffff?text=Best+Friends" }
+        ];
+
+        let currentPosition = 0;
+
+        function initCarousel() {
+            const track = document.getElementById("carouselTrack");
+            movies.forEach(movie => {
+                const item = document.createElement("div");
+                item.className = "carousel-item";
+                item.innerHTML = `<img src="${movie.poster}" alt="${movie.title}" class="movie-poster" title="${movie.title}">`;
+                track.appendChild(item);
+            });
+        }
+
+        function scrollCarousel(direction) {
+            const track = document.getElementById("carouselTrack");
+            const itemWidth = 215; // 180px poster + 15px gap + padding
+            currentPosition += direction * itemWidth;
+            
+            // Prevent scrolling too far
+            const maxScroll = -(track.scrollWidth - track.parentElement.offsetWidth);
+            currentPosition = Math.min(0, Math.max(currentPosition, maxScroll));
+            
+            track.style.transform = `translateX(${currentPosition}px)`;
+        }
+
+        window.addEventListener("DOMContentLoaded", initCarousel);
+    </script>
+</body>
+</html>

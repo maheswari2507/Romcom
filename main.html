@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffb3b3;
+            min-height: 100vh;
+            color: #ffb3b3;
+            padding-bottom: 50px;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            height: 70px;
+            background: #ffb3b3 !important;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            margin-right: auto;
+            background:#ca7f68;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #ca7f68;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.edit {
+            background:#ca7f68 !important;
+            color: white !important;
+        }
+
+        .nav-btn.edit:hover {
+            background: #ca7f68 !important;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.logout {
+            background: #ca7f68 !important;
+            color: white !important;
+        }
+
+        .nav-btn.logout:hover {
+            background: #8b5a4c !important;
+            transform: translateY(-2px);
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            padding: 40px 20px;
+            text-align: center;
+            background:#faebd7 !important;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            color:#ca7f68!important;
+        }
+
+        .header p {
+            font-size: 16px;
+            color:#ca7f68 !important;
+            margin-bottom: 20px;
+        }
+
+        .user-prefs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pref-badge {
+            background: #ca7f68 !important;
+            color: #faebd7!important;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ===== MOVIE SECTION ===== */
+        .movie-section {
+            margin-bottom: 50px;
+            background-color: transparent !important;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white !important;
+        }
+
+        .section-title .emoji {
+            font-size: 32px;
+        }
+
+        .movies-scroll {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px 0;
+            scroll-behavior: smooth;
+        }
+
+        /* ===== MOVIE CARD ===== */
+        .movie-card {
+            flex: 0 0 200px;
+            padding: 5px;
+            margin-left: 5px;
+            
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(218, 150, 155, 0.3) !important;
+            border: 2px solid #da969b !important;
+            
+               
+    display: flex;            /* IMPORTANT */
+    flex-direction: column;   /* image on top, text below */
+        }
+
+        .movie-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(218, 150, 155, 0.6);
+            border-color: #da969b !important;
+        }
+
+       
+
+        .movie-info {
+            padding: 12px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(202, 127, 104, 0.4) !important;
+        }
+        .movie-card {
+    position: relative;   /* 🔥 REQUIRED for save icon */
+}
+
+
+        .movie-title {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+            white-space: normal;
+            color: #faebd7 !important;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .movie-rating {
+            font-size: 12px;
+            color: #faebd7 !important;
+            font-weight: 600;
+        }
+
+        /* ===== LOADING & EMPTY STATE ===== */
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            font-size: 18px;
+            color: #faebd7 !important;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(250, 235, 215, 0.3);
+            border-top: 4px solid #faebd7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-prefs {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .no-prefs h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #faebd7 !important;
+        }
+
+        .no-prefs p {
+            color: #ffb3b3 !important;
+            margin-bottom: 30px;
+        }
+
+        .set-prefs-btn {
+            background: #da969b !important;
+            color: white !important;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .set-prefs-btn:hover {
+            transform: translateY(-2px);
+            background: #ca7f68 !important;
+            box-shadow: 0 10px 25px rgba(218, 150, 155, 0.6);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .movie-card {
+                flex: 0 0 150px;
+                height: 240px;
+            }
+
+            .movie-poster {
+                height: 170px;
+                font-size: 40px;
+            }
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .nav-buttons {
+                gap: 10px;
+            }
+
+            .nav-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+            .movie-poster{
+
+    
+    
+    object-fit: cover;    
+      width: 100%;
+    aspect-ratio: 2 / 3;
+    
+    border-radius: 10px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #da969b 0%, #ca7f68 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    font-weight: 700;
+    color: white;
+    transition: all 0.3s ease;
+    border: 2px solid #da969b;
+}
+
+ .movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+   
+      /* IMAGE FITS WITHOUT STRETCH */
+    display: block;
+}
+.save-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 10;
+    background: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    padding: 6px;
+    transition: all 0.3s ease;
+}
+
+.save-icon:hover {
+    transform: scale(1.2);
+}
+
+.save-icon.saved {
+    color: red;
+}
+.movie-card {
+    cursor: default;   /* instead of pointer */
+}
+
+            
+
+
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">🎬 RomCom</div>
+        
+        <div class="nav-buttons">
+            <div style="margin-top: 20px;">
+    <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search a movie..."
+        style="
+            padding: 12px;
+            width: 260px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        "
+        oninput="handleSearch()"
+    />
+    <button 
+    onclick="showWatchlist()" 
+    style="
+        margin-left: 10px;
+        padding: 12px 18px;
+        border-radius: 8px;
+        border: none;
+        background: #ca7f68;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    "
+>
+    💖 Watchlist
+</button>
+
+</div>
+
+            
+            <button class="nav-btn edit" onclick="editPreferences()">Edit Preferences</button>
+            <button class="nav-btn logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- HEADER WITH USER PREFS -->
+    <div class="header">
+        <h1>Your Personalized Recommendations</h1>
+        <p>Movies tailored to your favorite romance tropes</p>
+        <div class="user-prefs" id="userPrefsDisplay"></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="container" id="mainContent">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading your personalized movies...</p>
+        </div>
+    </div>
+
+    <script>
+        
+
+
+
+
+        // Sample movie database organized by tropes
+        const movieDatabase = {
+            "Enemies to Lovers": [
+                { title: "Pride and Prejudice", rating: "8.5/10",poster:"movie1.jpg" },
+                { title: "10 Things I Hate About You", rating: "8.3/10",poster:"movie1.jpg" },
+                { title: "Hitch", rating: "7.9/10" },
+                { title: "You've Got Mail", rating: "7.7/10" },
+                { title: "When Harry Met Sally", rating: "7.6/10" },
+                { title: "Legally Blonde", rating: "7.0/10" },
+                { title: "The Princess Diaries", rating: "6.4/10" },
+                { title: "Bridget Jones", rating: "7.1/10" }
+            ],
+            "Opposites Attract": [
+                { title: "Grease", rating: "7.2/10" },
+                { title: "Dirty Dancing", rating: "7.0/10" },
+                { title: "Notting Hill", rating: "7.0/10" },
+                { title: "Maid in Manhattan", rating: "6.3/10" },
+                { title: "While You Were Sleeping", rating: "7.0/10" },
+                { title: "Ever After", rating: "7.4/10" },
+                { title: "A Knight's Tale", rating: "6.3/10" }
+            ],
+            "Forced Proximity": [
+                { title: "The Proposal", rating: "7.1/10" },
+                { title: "Romancing the Stone", rating: "7.2/10" },
+                { title: "Overboard", rating: "7.0/10" },
+                { title: "It Happened One Night", rating: "8.2/10" },
+                { title: "The Awful Truth", rating: "8.0/10" },
+                { title: "Midnight Run", rating: "7.0/10" }
+            ],
+            "Slow Burn": [
+                { title: "Before Sunrise", rating: "8.1/10" },
+                { title: "Before Sunset", rating: "8.0/10" },
+                { title: "Like Crazy", rating: "7.3/10" },
+                { title: "Crazy, Stupid, Love", rating: "7.6/10" },
+                { title: "The Time Traveler's Wife", rating: "7.0/10" },
+                { title: "About a Boy", rating: "7.0/10" }
+            ],
+            "Fake Dating": [
+                { title: "The Proposal", rating: "7.1/10" },
+                { title: "Failure to Launch", rating: "6.5/10" },
+                { title: "Ghosts of Girlfriends Past", rating: "6.5/10" },
+                { title: "The Wedding Date", rating: "6.1/10" },
+                { title: "Set It Up", rating: "6.8/10" }
+            ],
+            "Second Chance Romance": [
+                { title: "The Notebook", rating: "7.8/10" },
+                { title: "Message in a Bottle", rating: "6.5/10" },
+                { title: "Love Again", rating: "6.8/10" },
+                { title: "Ghostemane", rating: "7.0/10" },
+                { title: "Love at Christmas", rating: "6.2/10" }
+            ],
+            "Friends to Lovers": [
+                { title: "When Harry Met Sally", rating: "7.6/10" },
+                { title: "My Best Friend's Wedding", rating: "6.4/10" },
+                { title: "Chasing Amy", rating: "7.1/10" },
+                { title: "Love and Basketball", rating: "6.9/10" },
+                { title: "Two Weeks Notice", rating: "6.7/10" }
+            ],
+            "Forbidden Love": [
+                { title: "Romeo and Juliet", rating: "6.9/10" },
+                { title: "Twilight", rating: "5.3/10" },
+                { title: "The Fault in Our Stars", rating: "7.7/10" },
+                { title: "Phantom of the Opera", rating: "6.8/10" },
+                { title: "Brokeback Mountain", rating: "7.9/10" }
+            ],
+            "Grumpy/Sunshine": [
+                { title: "Legally Blonde", rating: "7.0/10" },
+                { title: "It's Complicated", rating: "6.5/10" },
+                { title: "The Princess Bride", rating: "8.3/10" },
+                { title: "Enchanted", rating: "6.8/10" },
+                { title: "Shrek", rating: "7.9/10" }
+            ],
+            "Workplace Romance": [
+                { title: "You've Got Mail", rating: "7.7/10" },
+                { title: "Working Girl", rating: "6.8/10" },
+                { title: "Nine to Five", rating: "6.9/10" },
+                { title: "Secretary", rating: "7.0/10" },
+                { title: "The Intern", rating: "6.8/10" }
+            ],
+            "Fake Marriage": [
+                { title: "The Proposal", rating: "7.1/10" },
+                { title: "Shottas", rating: "6.5/10" },
+                { title: "I Now Pronounce You Chuck and Larry", rating: "6.1/10" },
+                { title: "Green Card", rating: "6.3/10" }
+            ],
+            "Star-Crossed Lovers": [
+                { title: "Titanic", rating: "7.8/10" },
+                { title: "The Fault in Our Stars", rating: "7.7/10" },
+                { title: "A Walk to Remember", rating: "6.3/10" },
+                { title: "The Time Traveler's Wife", rating: "7.0/10" }
+            ]
+        };
+
+        const tropeEmojis = {
+            "Enemies to Lovers": "💔➡️💕",
+            "Opposites Attract": "🌙☀️",
+            "Forced Proximity": "🏠💕",
+            "Slow Burn": "🔥⏰",
+            "Fake Dating": "🎭❤️",
+            "Second Chance Romance": "🔄💑",
+            "Friends to Lovers": "👯💕",
+            "Forbidden Love": "🚫❤️",
+            "Grumpy/Sunshine": "😤☀️",
+            "Workplace Romance": "💼💕",
+            "Fake Marriage": "💍💫",
+            "Star-Crossed Lovers": "⭐💔"
+        };
+document.addEventListener("submit", function (e) {
+    e.preventDefault();
+});
+
+        let userPreferences = [];
+         let savedMovies = new Set();
+
+        // Load preferences on page load
+        window.addEventListener("DOMContentLoaded", async () => {
+            const userPhone = localStorage.getItem('userPhone');
+            
+            if (!userPhone) {
+                window.location.href = 'preferences.html';
+                return;
+            }
+
+            await loadSavedMovies(userPhone);     // 🔥 FIRST
+await loadUserPreferences(userPhone); // 🔥 THEN render
+
+        });
+
+        // Load user preferences from backend
+async function loadUserPreferences(userId) {
+    try {
+        const response = await fetch(`http://localhost:5000/get-preferences/${userId}`);
+
+        if (!response.ok) {
+            console.log("⚠️ Preferences not ready yet, retrying...");
+            setTimeout(() => loadUserPreferences(userId), 500);
+            return;
+        }
+
+        const data = await response.json();
+
+        if (!data.data || !data.data.tropes || data.data.tropes.length === 0) {
+            showNoPreferences();
+            return;
+        }
+
+        userPreferences = data.data.tropes;
+        console.log("✅ Preferences loaded:", userPreferences);
+        displayMovies();
+
+    } catch (error) {
+        console.error("❌ Preference load error:", error);
+        setTimeout(() => loadUserPreferences(userId), 500);
+    }
+}
+
+
+
+        // Display movies organized by user preferences
+function displayMovies() {
+    const mainContent = document.getElementById("mainContent");
+    const prefsDisplay = document.getElementById("userPrefsDisplay");
+
+    // ✅ REMOVE LOADING SPINNER ALWAYS
+    mainContent.innerHTML = "";
+    prefsDisplay.innerHTML = "";
+
+    // ❗ If no preferences
+    if (!userPreferences || userPreferences.length === 0) {
+        showNoPreferences();
+        return;
+    }
+
+    // Preference badges
+    prefsDisplay.innerHTML = userPreferences
+        .map(pref => `
+            <div class="pref-badge">
+                ${tropeEmojis[pref] || "💕"} ${pref}
+            </div>
+        `)
+        .join("");
+
+    userPreferences.forEach(trope => {
+        const movies = movieDatabase[trope] || [];
+        const safeId = trope.replace(/\s+/g, "-").toLowerCase();
+
+        const section = document.createElement("div");
+        section.className = "movie-section";
+
+        section.innerHTML = `
+            <div class="section-title">
+                <span class="emoji">${tropeEmojis[trope] || "💕"}</span>
+                ${trope}
+            </div>
+
+            <div class="movies-scroll" id="scroll-${safeId}">
+                ${movies.map(movie => `
+                    <div class="movie-card">
+  <div 
+  class="save-icon ${savedMovies.has(movie.title) ? 'saved' : ''}" 
+  onclick="toggleHeart(event, this)"
+  data-title="${movie.title}"
+  data-trope="${trope}"
+  data-poster="${movie.poster || ''}"
+  data-rating="${movie.rating}"
+>
+
+  ${savedMovies.has(movie.title) ? '❤️' : '🤍'}
+</div>
+
+
+                        <div class="movie-poster">
+                            <img src="${movie.poster || ''}" alt="${movie.title}">
+                        </div>
+
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.title}</div>
+                            <div class="movie-rating">⭐ ${movie.rating}</div>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        `;
+
+        mainContent.appendChild(section);
+    });
+}
+
+async function saveMovieToDB(userId, title, trope, poster, rating) {
+    try {
+        await fetch("http://localhost:5000/save-movie", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_id: userId,
+                title,
+                trope,
+                poster,
+                rating
+            })
+        });
+    } catch (error) {
+        console.error("Save error:", error);
+    }
+}
+
+async function removeMovie(userId, title) {
+    try {
+        await fetch(
+            `http://localhost:5000/remove-from-watchlist/${userId}/${encodeURIComponent(title)}`,
+            { method: "DELETE" }
+        );
+    } catch (error) {
+        console.error("Remove error:", error);
+    }
+}
+
+
+async function loadSavedMovies(userId) {
+    try {
+        const response = await fetch(`http://localhost:5000/get-saved-movies/${userId}`);
+        if (response.ok) {
+            const data = await response.json();
+            savedMovies = new Set(data.saved_movies);
+            console.log("❤️ Loaded saved movies:", [...savedMovies]);
+        }
+    } catch (error) {
+        console.error("Error loading saved movies:", error);
+    }
+}
+
+
+
+        // Show message when no preferences are set
+        function showNoPreferences() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="no-prefs">
+                    <h2>No Preferences Set Yet</h2>
+                    <p>Select your favorite romance tropes to see personalized recommendations</p>
+                    <button class="set-prefs-btn" onclick="editPreferences()">Set Your Preferences</button>
+                </div>
+            `;
+        }
+
+        // Edit preferences
+        function editPreferences() {
+            window.location.href = 'preferences.html';
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('userPhone');
+            window.location.href = 'login.html';
+        }
+   
+
+        e.preventDefault();              // ✅ STOP default behavior
+    e.stopImmediatePropagation();    // ✅ STOP bubbling COMPLETELY
+
+async function toggleHeart(event, icon) {
+ 
+
+    const title = icon.dataset.title;
+    const trope = icon.dataset.trope;
+    const poster = icon.dataset.poster;
+    const rating = icon.dataset.rating;
+
+    const userId = localStorage.getItem("userPhone");
+    if (!userId) return;
+
+    if (savedMovies.has(title)) {
+        await removeMovie(userId, title);
+        savedMovies.delete(title);
+        icon.classList.remove("saved");
+        icon.textContent = "🤍";
+    } else {
+        await saveMovieToDB(userId, title, trope, poster, rating);
+        savedMovies.add(title);
+        icon.classList.add("saved");
+        icon.textContent = "❤️";
+    }
+}
+function handleSearch() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const mainContent = document.getElementById("mainContent");
+
+    // If search box is empty → show normal sections
+    if (!query) {
+        displayMovies();
+        return;
+    }
+
+    mainContent.innerHTML = "";
+
+    let foundMovies = [];
+
+    // Search through all tropes
+    for (const trope in movieDatabase) {
+        movieDatabase[trope].forEach(movie => {
+            if (movie.title.toLowerCase().includes(query)) {
+                foundMovies.push({ ...movie, trope });
+            }
+        });
+    }
+
+    // ❌ If no matches
+    if (foundMovies.length === 0) {
+        mainContent.innerHTML = `
+            <div class="no-prefs">
+                <h2>❌ No results found</h2>
+                <p>Try a different movie name</p>
+            </div>
+        `;
+        return;
+    }
+
+    // ✅ Show results
+    mainContent.innerHTML = `
+        <div class="movie-section">
+            <div class="section-title">
+                🔍 Search Results
+            </div>
+
+            <div class="movies-scroll">
+                ${foundMovies.map(movie => `
+                    <div class="movie-card">
+                        <div 
+                            class="save-icon ${savedMovies.has(movie.title) ? 'saved' : ''}" 
+                            onclick="toggleHeart(event, this)"
+                            data-title="${movie.title}"
+                            data-trope="${movie.trope}"
+                            data-poster="${movie.poster || ''}"
+                            data-rating="${movie.rating}"
+                        >
+                            ${savedMovies.has(movie.title) ? '❤️' : '🤍'}
+                        </div>
+
+                        <div class="movie-poster">
+                            <img src="${movie.poster || ''}" alt="${movie.title}">
+                        </div>
+
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.title}</div>
+                            <div class="movie-rating">⭐ ${movie.rating}</div>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+    `;
+}
+async function showWatchlist() {
+    const userId = localStorage.getItem("userPhone");
+    if (!userId) return;
+
+    const mainContent = document.getElementById("mainContent");
+    mainContent.innerHTML = "";
+
+    const res = await fetch(`http://localhost:5000/get-saved-movies/${userId}`);
+    const data = await res.json();
+
+    if (!data.saved_movies || data.saved_movies.length === 0) {
+        mainContent.innerHTML = `
+            <div class="no-prefs">
+                <h2>💔 No saved movies yet</h2>
+                <p>Heart some movies to see them here</p>
+            </div>
+        `;
+        return;
+    }
+
+    mainContent.innerHTML = `
+        <div class="movie-section">
+            <div class="section-title">💖 Your Watchlist</div>
+
+            <div class="movies-scroll">
+                ${data.saved_movies.map(movie => `
+                    <div class="movie-card">
+                        <div 
+                            class="save-icon saved"
+                            onclick="toggleHeart(event, this)"
+                            data-title="${movie.title}"
+                            data-trope="${movie.trope}"
+                            data-poster="${movie.poster || ''}"
+                            data-rating="${movie.rating}"
+                        >
+                            ❤️
+                        </div>
+
+                        <div class="movie-poster">
+                            <img src="${movie.poster || ''}" alt="${movie.title}">
+                        </div>
+
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.title}</div>
+                            <div class="movie-rating">⭐ ${movie.rating}</div>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+    `;
+}
+
+
+
+        
+        
+    </script>
+</body>
+</html>
