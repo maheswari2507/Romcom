@@ -11,6 +11,12 @@ CORS(app)
 
 print("RomCom APP STARTED")
 
+
+# ✅ ADD THIS RIGHT HERE
+@app.route("/")
+def home():
+    return "RomCom App is Live 🚀"
+
 # ---------- DB ----------
 def get_db_connection():
     db_path = os.path.join(os.getcwd(), "users.db")
