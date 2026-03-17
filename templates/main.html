@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffb3b3;
+            min-height: 100vh;
+            color: #ffb3b3;
+            padding-bottom: 50px;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            height: 70px;
+            background: #ffb3b3 !important;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            margin-right: auto;
+            background: #ca7f68;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #ca7f68;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.edit {
+            background: #ca7f68 !important;
+            color: white !important;
+        }
+
+        .nav-btn.edit:hover {
+            background: #ca7f68 !important;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.logout {
+            background: #ca7f68 !important;
+            color: white !important;
+        }
+
+        .nav-btn.logout:hover {
+            background: #8b5a4c !important;
+            transform: translateY(-2px);
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            padding: 40px 20px;
+            text-align: center;
+            background: #faebd7 !important;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            color: #ca7f68 !important;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #ca7f68 !important;
+            margin-bottom: 20px;
+        }
+
+        .user-prefs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pref-badge {
+            background: #ca7f68 !important;
+            color: #faebd7 !important;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ===== MOVIE SECTION ===== */
+        .movie-section {
+            margin-bottom: 50px;
+            background-color: transparent !important;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white !important;
+        }
+
+        .section-title .emoji {
+            font-size: 32px;
+        }
+
+        .movies-scroll {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px 0;
+            scroll-behavior: smooth;
+        }
+
+        /* ===== MOVIE CARD ===== */
+        .movie-card {
+            flex: 0 0 200px;
+            padding: 5px;
+            margin-left: 5px;
+
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(218, 150, 155, 0.3) !important;
+            border: 2px solid #da969b !important;
+
+
+            display: flex;
+            /* IMPORTANT */
+            flex-direction: column;
+            /* image on top, text below */
+        }
+
+        .movie-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(218, 150, 155, 0.6);
+            border-color: #da969b !important;
+        }
+
+
+
+        .movie-info {
+            padding: 12px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(202, 127, 104, 0.4) !important;
+        }
+
+        .movie-card {
+            position: relative;
+            /* 🔥 REQUIRED for save icon */
+        }
+
+
+        .movie-title {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+            white-space: normal;
+            color: #faebd7 !important;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .movie-rating {
+            font-size: 12px;
+            color: #faebd7 !important;
+            font-weight: 600;
+        }
+
+        /* ===== LOADING & EMPTY STATE ===== */
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            font-size: 18px;
+            color: #faebd7 !important;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(250, 235, 215, 0.3);
+            border-top: 4px solid #faebd7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .no-prefs {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .no-prefs h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #faebd7 !important;
+        }
+
+        .no-prefs p {
+            color: #ffb3b3 !important;
+            margin-bottom: 30px;
+        }
+
+        .set-prefs-btn {
+            background: #da969b !important;
+            color: white !important;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .set-prefs-btn:hover {
+            transform: translateY(-2px);
+            background: #ca7f68 !important;
+            box-shadow: 0 10px 25px rgba(218, 150, 155, 0.6);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .movie-card {
+                flex: 0 0 150px;
+                height: 240px;
+            }
+
+            .movie-poster {
+                height: 170px;
+                font-size: 40px;
+            }
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .nav-buttons {
+                gap: 10px;
+            }
+
+            .nav-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+
+        .movie-poster {
+
+
+
+            object-fit: cover;
+            width: 100%;
+            aspect-ratio: 2 / 3;
+
+            border-radius: 10px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #da969b 0%, #ca7f68 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            font-weight: 700;
+            color: white;
+            transition: all 0.3s ease;
+            border: 2px solid #da969b;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+
+            /* IMAGE FITS WITHOUT STRETCH */
+            display: block;
+        }
+
+        .save-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 22px;
+            cursor: pointer;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            padding: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .save-icon:hover {
+            transform: scale(1.2);
+        }
+
+        .save-icon.saved {
+            color: red;
+        }
+
+        .movie-card {
+            cursor: default;
+            /* instead of pointer */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">🎬 RomCom</div>
+
+        <div class="nav-buttons">
+            <input type="text" id="searchInput" placeholder="Search a movie..." style="
+                    padding: 12px;
+                    width: 260px;
+                    border-radius: 8px;
+                    border: none;
+                    outline: none;
+                " oninput="handleSearch()" />
+            <button type="button" class="nav-btn" onclick="window.location.href='watchlist.html'">💖 Watchlist</button>
+
+            <button class="nav-btn edit" onclick="editPreferences()">Edit Preferences</button>
+            <button class="nav-btn logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- HEADER WITH USER PREFS -->
+    <div class="header">
+        <h1>Your Personalized Recommendations</h1>
+        <p>Movies tailored to your favorite romance tropes</p>
+        <div class="user-prefs" id="userPrefsDisplay"></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="container" id="mainContent">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading your personalized movies...</p>
+        </div>
+    </div>
+
+    <script>
+
+
+
+        // ===== TMDB CONFIG =====
+        const TMDB_API_KEY = "a0db3462a41cde5f075cd71ed5fd48c4"; // put your key
+        const TMDB_BASE = "https://api.themoviedb.org/3";
+        const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
+        async function getPosterFromTMDB(title) {
+            try {
+                const res = await fetch(
+                    `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
+                );
+
+                const data = await res.json();
+
+                if (data.results && data.results.length > 0) {
+                    return TMDB_IMG + data.results[0].poster_path;
+                }
+
+                return "https://via.placeholder.com/300x450?text=No+Image";
+
+            } catch {
+                return "https://via.placeholder.com/300x450?text=No+Image";
+            }
+        }
+
+
+        // Sample movie database organized by tropes
+        const movieDatabase = {
+            "Enemies to Lovers": [
+                { "title": "Pride and Prejudice", "rating": "8.1/10" },
+                { "title": "10 Things I Hate About You", "rating": "7.3/10" },
+                { "title": "The Hating Game", "rating": "6.2/10" },
+                { "title": "The Proposal", "rating": "6.7/10" },
+                { "title": "Two Weeks Notice", "rating": "6.1/10" },
+                { "title": "The Ugly Truth", "rating": "6.4/10" },
+
+                { "title": "North & South", "rating": "8.6/10" },
+                { "title": "It Happened One Night", "rating": "8.1/10" },
+                { "title": "How to Lose a Guy in 10 Days", "rating": "6.5/10" }
+            ],
+
+            "Opposites Attract": [
+                { "title": "Grease", "rating": "7.2/10" },
+                { "title": "Notting Hill", "rating": "7.0/10" },
+                { "title": "Maid in Manhattan", "rating": "6.3/10" },
+
+                { "title": "The Big Sick", "rating": "7.5/10" },
+                { "title": "Crazy Rich Asians", "rating": "7.0/10" },
+                { "title": "Five Feet Apart", "rating": "7.2/10" },
+                { "title": "Sleeping with the Enemy", "rating": "6.8/10" },
+                { "title": "The Wedding Date", "rating": "6.0/10" },
+                { "title": "Enchanted", "rating": "7.0/10" },
+                { "title": "Splash", "rating": "6.8/10" },
+                { "title": "The Holiday", "rating": "7.0/10" }
+            ],
+
+            "Forced Proximity": [
+                { "title": "The Proposal", "rating": "6.7/10" },
+                { "title": "Overboard", "rating": "6.9/10" },
+                { "title": "It Happened One Night", "rating": "8.1/10" },
+                { "title": "Palm Springs", "rating": "7.4/10" },
+                { "title": "Two Night Stand", "rating": "6.4/10" },
+                { "title": "Lost in Translation", "rating": "7.7/10" },
+                { "title": "Before Sunrise", "rating": "8.1/10" },
+                { "title": "The Lost City", "rating": "6.1/10" },
+                { "title": "Honeymoon in Vegas", "rating": "5.8/10" },
+                { "title": "Couples Retreat", "rating": "5.5/10" },
+                { "title": "While You Were Sleeping", "rating": "6.8/10" },
+                { "title": "The Holiday", "rating": "6.9/10" }
+            ],
+
+            "Slow Burn": [
+                { "title": "Before Sunrise", "rating": "8.1/10" },
+                { "title": "Before Sunset", "rating": "8.0/10" },
+                { "title": "Call Me by Your Name", "rating": "7.8/10" },
+                { "title": "Blue Valentine", "rating": "7.4/10" },
+                { "title": "Her", "rating": "8.0/10" },
+                { "title": "Brooklyn", "rating": "7.5/10" },
+                { "title": "The Time Traveler's Wife", "rating": "7.1/10" },
+                { "title": "A Walk to Remember", "rating": "7.3/10" },
+                { "title": "The Fault in Our Stars", "rating": "7.7/10" },
+                { "title": "Eternal Sunshine of the Spotless Mind", "rating": "8.3/10" },
+                { "title": "About Time", "rating": "7.8/10" },
+                { "title": "Portrait of a Lady on Fire", "rating": "8.1/10" }
+            ],
+
+            "Fake Dating": [
+                { "title": "The Proposal", "rating": "6.7/10" },
+                { "title": "To All the Boys I've Loved Before", "rating": "7.0/10" },
+                { "title": "Holidate", "rating": "6.1/10" },
+                { "title": "Can't Buy Me Love", "rating": "6.7/10" },
+                { "title": "The Wedding Date", "rating": "6.2/10" },
+                { "title": "The Wedding Ringer", "rating": "6.6/10" },
+                { "title": "Love Hard", "rating": "6.3/10" },
+                { "title": "Just Go with It", "rating": "6.4/10" },
+                { "title": "While You Were Sleeping", "rating": "6.8/10" },
+                { "title": "My Fake Fiancé", "rating": "6.0/10" },
+                { "title": "Single All the Way", "rating": "6.7/10" },
+                { "title": "The Decoy Bride", "rating": "6.1/10" }
+            ],
+
+            "Second Chance Romance": [
+                { "title": "The Notebook", "rating": "7.8/10" },
+                { "title": "The Vow", "rating": "6.8/10" },
+                { "title": "Crazy, Stupid, Love", "rating": "7.4/10" },
+                { "title": "One Day", "rating": "7.0/10" },
+                { "title": "The Bridges of Madison County", "rating": "7.6/10" },
+                { "title": "The Lucky One", "rating": "6.4/10" },
+                { "title": "Safe Haven", "rating": "6.7/10" },
+                { "title": "Nights in Rodanthe", "rating": "6.0/10" },
+                { "title": "P.S. I Love You", "rating": "7.0/10" },
+                { "title": "Love Happens", "rating": "5.7/10" },
+                { "title": "Before Sunset", "rating": "8.1/10" },
+                { "title": "Sweet Home Alabama", "rating": "6.2/10" }
+            ],
+
+
+            "Friends to Lovers": [
+                { "title": "When Harry Met Sally", "rating": "7.7/10" },
+                { "title": "Love and Basketball", "rating": "7.2/10" },
+                { "title": "Just Friends", "rating": "6.2/10" },
+                { "title": "No Strings Attached", "rating": "6.2/10" },
+                { "title": "Friends with Benefits", "rating": "6.5/10" },
+                { "title": "What If", "rating": "6.8/10" },
+                { "title": "The Fault in Our Stars", "rating": "7.7/10" },
+                { "title": "Definitely, Maybe", "rating": "7.1/10" },
+                { "title": "Love, Rosie", "rating": "7.2/10" },
+                { "title": "13 Going on 30", "rating": "6.3/10" },
+                { "title": "Plus One", "rating": "6.6/10" },
+                { "title": "Always Be My Maybe", "rating": "6.8/10" }
+            ],
+
+            "Forbidden Love": [
+                { "title": "Romeo and Juliet", "rating": "6.7/10" },
+                { "title": "Brokeback Mountain", "rating": "7.7/10" },
+                { "title": "Carol", "rating": "7.2/10" },
+                { "title": "Call Me by Your Name", "rating": "7.8/10" },
+                { "title": "Portrait of a Lady on Fire", "rating": "8.1/10" },
+                { "title": "West Side Story", "rating": "7.5/10" },
+                { "title": "Titanic", "rating": "7.9/10" },
+                { "title": "Atonement", "rating": "7.8/10" },
+                { "title": "The Big Sick", "rating": "7.5/10" },
+                { "title": "Red, White & Royal Blue", "rating": "7.0/10" },
+                { "title": "The Half of It", "rating": "6.9/10" },
+                { "title": "Happiest Season", "rating": "6.6/10" }
+            ],
+
+            "Grumpy/Sunshine": [
+                { "title": "The Hating Game", "rating": "6.2/10" },
+                { "title": "10 Things I Hate About You", "rating": "7.3/10" },
+                { "title": "Pride and Prejudice", "rating": "8.1/10" },
+                { "title": "North & South", "rating": "8.6/10" },
+                { "title": "The Ugly Truth", "rating": "6.4/10" },
+                { "title": "Beauty and the Beast", "rating": "8.0/10" },
+                { "title": "Shrek", "rating": "7.9/10" },
+                { "title": "Enchanted", "rating": "7.1/10" },
+                { "title": "A Cinderella Story", "rating": "5.9/10" },
+                { "title": "Desk Set", "rating": "7.4/10" },
+                { "title": "It Could Happen to You", "rating": "6.4/10" },
+                { "title": "Moonlight & Mistletoe", "rating": "6.5/10" }
+            ],
+
+
+
+            "Workplace Romance": [
+                { "title": "You've Got Mail", "rating": "6.7/10" },
+                { "title": "Working Girl", "rating": "6.8/10" },
+                { "title": "Secretary", "rating": "7.0/10" },
+                { "title": "Maid in Manhattan", "rating": "5.3/10" },
+                { "title": "Two Weeks Notice", "rating": "6.1/10" },
+                { "title": "The Hating Game", "rating": "6.2/10" },
+                { "title": "Morning Glory", "rating": "6.5/10" },
+                { "title": "In Good Company", "rating": "6.4/10" },
+                { "title": "The Proposal", "rating": "6.7/10" },
+                { "title": "Desk Set", "rating": "7.4/10" },
+                { "title": "Adam's Rib", "rating": "7.5/10" },
+                { "title": "His Girl Friday", "rating": "7.8/10" }
+            ],
+
+            "Fake Marriage": [
+                { "title": "The Proposal", "rating": "6.7/10" },
+                { "title": "Green Card", "rating": "6.2/10" },
+                { "title": "I Now Pronounce You Chuck and Larry", "rating": "5.9/10" },
+                { "title": "The Decoy Bride", "rating": "6.1/10" },
+                { "title": "My Fake Fiancé", "rating": "6.0/10" },
+                { "title": "Just Go with It", "rating": "6.4/10" },
+                { "title": "Holidate", "rating": "6.1/10" },
+                { "title": "The Wedding Date", "rating": "6.2/10" },
+                { "title": "The Wedding Ringer", "rating": "6.6/10" },
+                { "title": "While You Were Sleeping", "rating": "6.8/10" },
+                { "title": "License to Wed", "rating": "5.2/10" },
+                { "title": "Destination Wedding", "rating": "6.0/10" }
+            ],
+
+            "Star-Crossed Lovers": [
+                { "title": "Titanic", "rating": "7.9/10" },
+                { "title": "The Fault in Our Stars", "rating": "7.7/10" },
+                { "title": "A Walk to Remember", "rating": "7.3/10" },
+                { "title": "Romeo and Juliet", "rating": "6.7/10" },
+                { "title": "West Side Story", "rating": "7.5/10" },
+                { "title": "Brokeback Mountain", "rating": "7.7/10" },
+                { "title": "Atonement", "rating": "7.8/10" },
+                { "title": "The Time Traveler's Wife", "rating": "7.1/10" },
+                { "title": "Message in a Bottle", "rating": "6.5/10" },
+                { "title": "Warm Bodies", "rating": "6.8/10" },
+                { "title": "The Last Letter from Your Lover", "rating": "6.7/10" },
+                { "title": "One Day", "rating": "7.0/10" }
+            ]
+
+        };
+
+        const tropeEmojis = {
+            "Enemies to Lovers": "💔➡️💕",
+            "Opposites Attract": "🌙☀️",
+            "Forced Proximity": "🏠💕",
+            "Slow Burn": "🔥⏰",
+            "Fake Dating": "🎭❤️",
+            "Second Chance Romance": "🔄💑",
+            "Friends to Lovers": "👯💕",
+            "Forbidden Love": "🚫❤️",
+            "Grumpy/Sunshine": "😤☀️",
+            "Workplace Romance": "💼💕",
+            "Fake Marriage": "💍💫",
+            "Star-Crossed Lovers": "⭐💔"
+        };
+
+        let userPreferences = [];
+        let savedMovies = new Set();
+
+
+        // Load preferences on page load
+        window.addEventListener("DOMContentLoaded", async () => {
+            const userPhone = localStorage.getItem('userPhone');
+
+            if (!userPhone) {
+                window.location.href = 'preferences.html';
+                return;
+            }
+
+            await loadSavedMovies(userPhone);     // 🔥 FIRST
+            await loadUserPreferences(userPhone); // 🔥 THEN render
+
+        });
+
+        // Load user preferences from backend
+        async function loadUserPreferences(userId) {
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`http://localhost:5000/get-preferences/${userId}?t=${timestamp}`);
+
+                if (response.status === 404) {
+                    showNoPreferences();
+                    return;
+                }
+
+                if (!response.ok) {
+                    console.log("⚠️ Preferences not ready yet, retrying...");
+                    setTimeout(() => loadUserPreferences(userId), 500);
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (!data.data || !data.data.tropes || data.data.tropes.length === 0) {
+                    showNoPreferences();
+                    return;
+                }
+
+                userPreferences = data.data.tropes;
+                console.log("✅ Preferences loaded:", userPreferences);
+                displayMovies();
+
+            } catch (error) {
+                console.error("❌ Preference load error:", error);
+                setTimeout(() => loadUserPreferences(userId), 500);
+            }
+        }
+        async function displayMovies() {
+
+            const mainContent = document.getElementById("mainContent");
+            const prefsDisplay = document.getElementById("userPrefsDisplay");
+
+            // Clear loading
+            mainContent.innerHTML = "";
+            prefsDisplay.innerHTML = "";
+
+            // If no preferences
+            if (!userPreferences || userPreferences.length === 0) {
+                showNoPreferences();
+                return;
+            }
+
+            // Show preference badges
+            prefsDisplay.innerHTML = userPreferences
+                .map(pref => `
+            <div class="pref-badge">
+                ${tropeEmojis[pref] || "💕"} ${pref}
+            </div>
+        `)
+                .join("");
+
+            // Render movies
+            for (const trope of userPreferences) {
+
+                let movies = movieDatabase[trope] || [];
+                const safeId = trope.replace(/\s+/g, "-").toLowerCase();
+
+                const section = document.createElement("div");
+                section.className = "movie-section";
+
+                section.innerHTML = `
+            <div class="section-title">
+                <span class="emoji">${tropeEmojis[trope] || "💕"}</span>
+                ${trope}
+            </div>
+
+            <div class="movies-scroll" id="scroll-${safeId}">
+                ${movies.map((movie, index) => `
+                    <div class="movie-card">
+                        <div 
+                            class="save-icon ${savedMovies.has(movie.title) ? 'saved' : ''}" 
+                            onclick="toggleHeart(event, this)"
+                            data-title="${movie.title}"
+                            data-trope="${trope}"
+                            data-poster="${movie.poster || ''}"
+                            data-rating="${movie.rating}"
+                        >
+                            ${savedMovies.has(movie.title) ? '❤️' : '🤍'}
+                        </div>
+
+                        <div class="movie-poster" id="poster-${safeId}-${index}">
+                            Loading...
+                        </div>
+
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.title}</div>
+                            <div class="movie-rating">⭐ ${movie.rating}</div>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        `;
+
+                mainContent.appendChild(section);
+
+                // Load posters
+                movies.forEach(async (movie, index) => {
+                    const posterUrl = await getPosterFromTMDB(movie.title);
+                    const el = document.getElementById(`poster-${safeId}-${index}`);
+                    if (el) {
+                        el.innerHTML = `<img src="${posterUrl}" />`;
+                    }
+                });
+            }
+        }
+
+
+
+
+
+        async function saveMovieToDB(userId, title, trope, poster, rating) {
+            try {
+                await fetch("http://localhost:5000/save-movie", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        title,
+                        trope,
+                        poster,
+                        rating
+                    })
+                });
+            } catch (error) {
+                console.error("Save error:", error);
+            }
+        }
+
+        async function removeMovie(userId, title) {
+            try {
+                await fetch(
+                    `http://localhost:5000/remove-from-watchlist/${userId}/${encodeURIComponent(title)}`,
+                    { method: "DELETE" }
+                );
+            } catch (error) {
+                console.error("Remove error:", error);
+            }
+        }
+
+
+        async function loadSavedMovies(userId) {
+            try {
+                const response = await fetch(`http://localhost:5000/get-saved-movies/${userId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const titles = data.saved_movies.map(m => m.title);
+                    savedMovies = new Set(titles);
+                    console.log("❤️ Loaded saved movies:", [...savedMovies]);
+                }
+            } catch (error) {
+                console.error("Error loading saved movies:", error);
+            }
+        }
+
+
+
+        // Show message when no preferences are set
+        function showNoPreferences() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="no-prefs">
+                    <h2>No Preferences Set Yet</h2>
+                    <p>Select your favorite romance tropes to see personalized recommendations</p>
+                    <button class="set-prefs-btn" onclick="editPreferences()">Set Your Preferences</button>
+                </div>
+            `;
+        }
+
+        // Edit preferences
+        function editPreferences() {
+            window.location.href = 'preferences.html';
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('userPhone');
+            window.location.href = 'login.html';
+        }
+
+
+        async function toggleHeart(event, icon) {
+
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            const title = icon.dataset.title;
+            const trope = icon.dataset.trope;
+            const poster = icon.dataset.poster;
+            const rating = icon.dataset.rating;
+
+            const userId = localStorage.getItem("userPhone");
+            if (!userId) return;
+
+            if (savedMovies.has(title)) {
+                await removeMovie(userId, title);
+                savedMovies.delete(title);
+                icon.classList.remove("saved");
+                icon.textContent = "🤍";
+            } else {
+
+                let finalPoster = poster;
+
+                // 🔥 Fetch poster if missing
+                if (!finalPoster || finalPoster === "") {
+                    finalPoster = await getPosterFromTMDB(title);
+                }
+
+                // 🔥 SAVE TO DATABASE (THIS WAS MISSING)
+                await saveMovieToDB(userId, title, trope, finalPoster, rating);
+
+                savedMovies.add(title);
+                icon.classList.add("saved");
+                icon.textContent = "❤️";
+            }
+        }
+        // ✅ REPLACE your existing handleSearch() with this fixed async version
+
+        async function handleSearch() {
+            const query = document.getElementById("searchInput").value.toLowerCase();
+            const mainContent = document.getElementById("mainContent");
+
+            // If empty → show normal movies
+            if (!query) {
+                displayMovies();
+                return;
+            }
+
+            mainContent.innerHTML = "";
+
+            let foundMovies = [];
+
+            for (const trope in movieDatabase) {
+                movieDatabase[trope].forEach(movie => {
+                    if (movie.title.toLowerCase().includes(query)) {
+                        // avoid duplicates
+                        if (!foundMovies.find(m => m.title === movie.title)) {
+                            foundMovies.push({ ...movie, trope });
+                        }
+                    }
+                });
+            }
+
+            // No results
+            if (foundMovies.length === 0) {
+                mainContent.innerHTML = `
+            <div class="no-prefs">
+                <h2>❌ No results found</h2>
+                <p>Try a different movie name</p>
+            </div>
+        `;
+                return;
+            }
+
+            // Build cards with placeholder first
+            mainContent.innerHTML = `
+        <div class="movie-section">
+            <div class="section-title">🔍 Search Results</div>
+            <div class="movies-scroll" id="search-results-scroll">
+                ${foundMovies.map((movie, index) => `
+                    <div class="movie-card">
+                        <div
+                            class="save-icon ${savedMovies.has(movie.title) ? 'saved' : ''}"
+                            onclick="toggleHeart(event, this)"
+                            data-title="${movie.title}"
+                            data-trope="${movie.trope}"
+                            data-poster=""
+                            data-rating="${movie.rating}"
+                        >
+                            ${savedMovies.has(movie.title) ? '❤️' : '🤍'}
+                        </div>
+
+                        <div class="movie-poster" id="search-poster-${index}">
+                            Loading...
+                        </div>
+
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.title}</div>
+                            <div class="movie-rating">⭐ ${movie.rating}</div>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+    `;
+
+            // ✅ Fetch posters from TMDB after cards are rendered
+            foundMovies.forEach(async (movie, index) => {
+                const posterUrl = await getPosterFromTMDB(movie.title);
+                const el = document.getElementById(`search-poster-${index}`);
+                if (el) {
+                    el.innerHTML = `<img src="${posterUrl}" />`;
+                    // Also update save-icon's data-poster so it saves correctly
+                    const saveIcon = el.parentElement.querySelector('.save-icon');
+                    if (saveIcon) saveIcon.dataset.poster = posterUrl;
+                }
+            });
+        }
+
+
+
+    </script>
+</body>
+
+</html>

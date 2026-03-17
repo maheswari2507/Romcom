@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Favorite Romance Tropes</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffd2d2 0%, #ffe5e5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+            padding: 50px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: rgb(112, 109, 109);
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgb(150, 130, 130);
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .tropes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .trope-card {
+            background: white;
+            border: 3px solid #ffb3b3;
+            border-radius: 10px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .trope-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .trope-card input {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 24px;
+            height: 24px;
+            accent-color: #da969b;
+        }
+
+        .trope-card.selected {
+            background: #faebd7;
+            border-color: #da969b;
+            box-shadow: 0 8px 25px rgba(218, 150, 155, 0.3);
+        }
+
+        .trope-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #8b6d6d;
+            margin-bottom: 10px;
+        }
+
+        .trope-description {
+            font-size: 14px;
+            color: #a08f8f;
+            line-height: 1.6;
+        }
+
+        .emoji {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background: #c97f7f;
+            color: white;
+        }
+
+        .reset-btn {
+            background: #f0d9d9;
+            color: #8b6d6d;
+            border: 2px solid #da969b;
+        }
+
+        #result-message {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        .result-message.success {
+            color: green;
+        }
+
+        .result-message.error {
+            color: red;
+        }
+
+        .selection-counter {
+            text-align: center;
+            color: #8b6d6d;
+            margin-bottom: 30px;
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <h1>🎬 Choose Your Favorite Romance Tropes</h1>
+        <p class="subtitle">Complete your profile to get personalized movie recommendations</p>
+
+        <div class="selection-counter">
+            <span id="selected-count">0</span> tropes selected
+        </div>
+
+        <div class="tropes-grid" id="tropesContainer"></div>
+
+        <div class="button-group">
+            <button class="save-btn" onclick="savePreferences()">Continue to Home</button>
+            <button class="reset-btn" onclick="resetSelections()">Clear</button>
+        </div>
+
+        <p id="result-message"></p>
+
+    </div>
+
+    <script>
+
+        const tropes = [
+            { title: "Enemies to Lovers", emoji: "💔➡️💕", description: "Two rivals slowly fall in love." },
+            { title: "Opposites Attract", emoji: "🌙☀️", description: "Different personalities attract." },
+            { title: "Forced Proximity", emoji: "🏠💕", description: "Characters forced together fall in love." },
+            { title: "Slow Burn", emoji: "🔥⏰", description: "Love develops slowly over time." },
+            { title: "Fake Dating", emoji: "🎭❤️", description: "Fake relationship becomes real." },
+            { title: "Second Chance Romance", emoji: "🔄💑", description: "Old lovers reunite." },
+            { title: "Friends to Lovers", emoji: "👯💕", description: "Friendship turns into love." },
+            { title: "Forbidden Love", emoji: "🚫❤️", description: "Love despite obstacles." },
+            { title: "Grumpy/Sunshine", emoji: "😤☀️", description: "Opposite personalities fall in love." },
+            { title: "Workplace Romance", emoji: "💼💕", description: "Colleagues fall in love." },
+            { title: "Fake Marriage", emoji: "💍💫", description: "Marriage for reasons becomes real love." },
+            { title: "Star-Crossed Lovers", emoji: "⭐💔", description: "Love against fate." }
+        ];
+
+        let currentUserId = localStorage.getItem("userPhone");
+
+        if (!currentUserId) {
+            alert("Please login again");
+            window.location.href = "login.html";
+        }
+
+        function initializeTropes() {
+
+            const container = document.getElementById("tropesContainer");
+
+            tropes.forEach((trope, index) => {
+
+                const card = document.createElement("div");
+                card.className = "trope-card";
+
+                card.innerHTML = `
+<input type="checkbox" id="trope-${index}">
+<div class="emoji">${trope.emoji}</div>
+<div class="trope-title">${trope.title}</div>
+<div class="trope-description">${trope.description}</div>
+`;
+
+                card.onclick = (e) => {
+                    if (e.target.tagName !== "INPUT") {
+                        const checkbox = card.querySelector("input");
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    updateSelection();
+                };
+
+                container.appendChild(card);
+
+            });
+
+            loadExistingPreferences();
+        }
+
+        function updateSelection() {
+
+            const cards = document.querySelectorAll(".trope-card");
+            const checkboxes = document.querySelectorAll("input[type='checkbox']");
+            let count = 0;
+
+            checkboxes.forEach((checkbox, index) => {
+
+                if (checkbox.checked) {
+                    cards[index].classList.add("selected");
+                    count++;
+                } else {
+                    cards[index].classList.remove("selected");
+                }
+
+            });
+
+            document.getElementById("selected-count").textContent = count;
+        }
+
+        async function loadExistingPreferences() {
+
+            try {
+
+                const response = await fetch(`http://localhost:5000/get-preferences/${currentUserId}`);
+
+                if (response.ok) {
+
+                    const data = await response.json();
+                    const saved = data.data.tropes;
+
+                    document.querySelectorAll("input[type='checkbox']").forEach((box, i) => {
+                        if (saved.includes(tropes[i].title)) {
+                            box.checked = true;
+                        }
+                    });
+
+                    updateSelection();
+                }
+
+            } catch (e) {
+                console.log("No saved preferences");
+            }
+
+        }
+
+        async function savePreferences() {
+
+            const checkboxes = document.querySelectorAll("input[type='checkbox']");
+            const selectedTropes = [];
+
+            checkboxes.forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    selectedTropes.push(tropes[index].title);
+                }
+            });
+
+            if (selectedTropes.length === 0) {
+                showMessage("Please select at least one trope", "error");
+                return;
+            }
+
+            try {
+
+                const response = await fetch("http://localhost:5000/save-preferences", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        tropes: selectedTropes
+                    })
+                });
+
+                const data = await response.json();
+                console.log("Server response:", data);
+
+                showMessage("Preferences saved! Redirecting...", "success");
+
+                // Redirect immediately
+                window.location.href = "main.html";
+
+            } catch (error) {
+
+                console.error("Error:", error);
+                showMessage("Server error but redirecting...", "error");
+
+                // Redirect immediately
+                window.location.href = "main.html";
+            }
+        }
+        function resetSelections() {
+            document.querySelectorAll("input[type='checkbox']").forEach(c => c.checked = false);
+            updateSelection();
+        }
+
+        function showMessage(msg, type) {
+            const el = document.getElementById("result-message");
+            el.textContent = msg;
+            el.className = "result-message " + type;
+        }
+
+        window.addEventListener("DOMContentLoaded", initializeTropes);
+
+    </script>
+
+</body>
+
+</html>

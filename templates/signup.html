@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffd2d2);
+            min-height: 100vh;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* ===== NAVBAR — matches recommendations page ===== */
+        .navbar {
+            height: 70px;
+            background: #ffb3b3 !important;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            margin-right: auto;
+            background: #ca7f68;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #ca7f68;
+            text-decoration: none;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: #ca7f68 !important;
+            color: white !important;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .nav-btn:hover {
+            background: #8b5a4c !important;
+            transform: translateY(-2px);
+        }
+
+        /* ===== MAIN BOX ===== */
+        .mainbox {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 70px);
+            padding: 30px 20px;
+        }
+
+        .centerbox {
+            background: #faebd7;
+            padding: 50px 45px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 480px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header-icon {
+            font-size: 45px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+        }
+
+        input::placeholder {
+            color: #bbb;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #da969b;
+            box-shadow: 0 0 0 4px rgba(218, 150, 155, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .btn-signup {
+            background: linear-gradient(#da969b);
+            color: white;
+            box-shadow: 0 8px 20px rgba(218, 150, 155, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(218, 150, 155, 0.5);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            min-height: 20px;
+            font-size: 14px;
+            opacity: 1 !important;
+            display: block !important;
+        }
+
+        .message.success {
+            color: green;
+        }
+
+        .message.error {
+            color: red;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            color: #ddd;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .login-link {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #ca7f68;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #8b5a4c;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .centerbox {
+                padding: 35px 25px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">🎬 RomCom</div>
+        <div class="nav-buttons">
+            <a href="home1.html" class="nav-btn">Home</a>
+            <a href="login.html" class="nav-btn">Login</a>
+        </div>
+    </nav>
+
+    <!-- SIGN UP BOX -->
+    <div class="mainbox">
+        <div class="centerbox">
+            <div class="header">
+                <div class="header-icon">✨</div>
+                <h2>Create Account</h2>
+                <p class="subtitle">Join us today and get started</p>
+            </div>
+
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="name">👤 Full Name</label>
+                    <input type="text" id="name" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">📧 Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">🔐 Password</label>
+                    <input type="password" id="password" placeholder="Create a strong password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">📱 Phone Number</label>
+                    <input type="text" id="phone" placeholder="Enter your phone number" required>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" id="submitBtn" class="btn-signup">Sign Up</button>
+                </div>
+            </form>
+
+            <p id="message" class="message"></p>
+
+            <div class="divider">OR</div>
+
+            <div class="login-link">
+                Already have an account? <a href="login.html">Login here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('signupForm');
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const name = document.getElementById("name").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const password = document.getElementById("password").value;
+                const phone = document.getElementById("phone").value.trim();
+                const messageDiv = document.getElementById("message");
+                const submitBtn = document.getElementById("submitBtn");
+
+                if (!name || !email || !password || !phone) {
+                    messageDiv.textContent = "⚠️ Please fill all fields";
+                    messageDiv.className = "message error";
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Signing Up...";
+
+                fetch("http://127.0.0.1:5000/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password, phone })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "Sign Up";
+
+                        if (data.message.includes("successfully")) {
+                            form.reset();
+                            setTimeout(() => {
+                                messageDiv.innerHTML = "✅ " + data.message + "<br><br><span style='color: #666; font-size: 13px;'>Please login now using your created account. <a href='login.html'>Click here to Login</a></span>";
+                                messageDiv.className = "message success";
+                            }, 50);
+                        } else {
+                            messageDiv.textContent = "❌ " + data.message;
+                            messageDiv.className = "message error";
+                        }
+                    })
+                    .catch(error => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "Sign Up";
+                        messageDiv.textContent = "❌ Registration failed";
+                        messageDiv.className = "message error";
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>
