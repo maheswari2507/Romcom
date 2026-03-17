@@ -178,8 +178,8 @@
     <nav class="navbar">
         <div class="navbar-brand">🎬 RomCom</div>
         <div class="nav-buttons">
-            <a href="home1.html" class="nav-btn">Home</a>
-            <a href="home1.html" class="nav-btn">Sign Up</a>
+            <a href="/" class="nav-btn">Home</a>
+            <a href="/signup-page" class="nav-btn">Sign Up</a>
         </div>
     </nav>
 
@@ -205,7 +205,7 @@
 
         <!-- Sign up link inside box too -->
         <div class="signup-prompt">
-            Don't have an account? <a href="home1.html">Sign Up</a>
+            Don't have an account? <a href="/signup-page">Sign Up</a>
         </div>
     </div>
 
@@ -224,7 +224,7 @@
             }
 
             try {
-                const response = await fetch("http://localhost:5000/login", {
+                const response = await fetch("/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ phone, password })
@@ -235,18 +235,10 @@
                 if (response.ok) {
                     resultDiv.textContent = data.message;
                     resultDiv.className = "success";
-                    document.getElementById("login_phone").value = "";
-                    document.getElementById("login_password").value = "";
 
-                    localStorage.setItem('userPhone', phone);  //USER PHONE FROM HERE WE ARE GETTING IN THE PREFERENCES PAGE LIKE FOR ID WHICH IS A PHONE NUMBER FROM HERE TO SAVE PREFERENCES
-                    console.log("✅ Saved phone to localStorage:", phone);
+                    localStorage.setItem('userPhone', phone);
 
-                    window.location.href = 'preferences.html';
-
-                    // ADD THIS: Redirect to preferences after 1 second
-                    setTimeout(() => {
-                        window.location.href = "preferences.html";
-                    }, 1000);
+                    window.location.href = "/preferences-page";
                 } else {
                     resultDiv.textContent = data.message;
                     resultDiv.className = "error";

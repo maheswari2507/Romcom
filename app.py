@@ -18,6 +18,23 @@ print("RomCom APP STARTED")
 def home():
     return render_template("home1.html")
 
+@app.route("/login-page")
+def login_page():
+    return render_template("login.html")
+
+@app.route("/signup-page")
+def signup_page():
+    return render_template("signup.html")
+
+@app.route("/main-page")
+def main_page():
+    return render_template("main.html")
+
+@app.route("/preferences-page")
+def preferences_page():
+    return render_template("preferences.html")
+
+
 # ---------- DB ----------
 def get_db_connection():
     db_path = os.path.join(os.getcwd(), "users.db")
