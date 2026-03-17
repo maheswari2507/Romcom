@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask import render_template
 import random
 import sqlite3
 import os
@@ -15,7 +16,7 @@ print("RomCom APP STARTED")
 # ✅ ADD THIS RIGHT HERE
 @app.route("/")
 def home():
-    return "RomCom App is Live 🚀"
+    return render_template("home1.html")
 
 # ---------- DB ----------
 def get_db_connection():
