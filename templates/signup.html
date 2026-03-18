@@ -22,7 +22,6 @@
             background-attachment: fixed;
         }
 
-        /* ===== NAVBAR — matches recommendations page ===== */
         .navbar {
             height: 70px;
             background: #ffb3b3 !important;
@@ -72,7 +71,6 @@
             transform: translateY(-2px);
         }
 
-        /* ===== MAIN BOX ===== */
         .mainbox {
             display: flex;
             justify-content: center;
@@ -268,8 +266,8 @@
     <nav class="navbar">
         <div class="navbar-brand">🎬 RomCom</div>
         <div class="nav-buttons">
-            <a href="home1.html" class="nav-btn">Home</a>
-            <a href="login.html" class="nav-btn">Login</a>
+            <a href="/" class="nav-btn">Home</a>
+            <a href="/login-page" class="nav-btn">Login</a>
         </div>
     </nav>
 
@@ -313,7 +311,7 @@
             <div class="divider">OR</div>
 
             <div class="login-link">
-                Already have an account? <a href="login.html">Login here</a>
+                Already have an account? <a href="/login-page">Login here</a>
             </div>
         </div>
     </div>
@@ -340,7 +338,7 @@
                 submitBtn.disabled = true;
                 submitBtn.textContent = "Signing Up...";
 
-                fetch("http://127.0.0.1:5000/register", {
+                fetch("/register", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ name, email, password, phone })
@@ -353,7 +351,7 @@
                         if (data.message.includes("successfully")) {
                             form.reset();
                             setTimeout(() => {
-                                messageDiv.innerHTML = "✅ " + data.message + "<br><br><span style='color: #666; font-size: 13px;'>Please login now using your created account. <a href='login.html'>Click here to Login</a></span>";
+                                messageDiv.innerHTML = "✅ " + data.message + "<br><br><span style='color: #666; font-size: 13px;'>Please login now using your created account. <a href='/login-page'>Click here to Login</a></span>";
                                 messageDiv.className = "message success";
                             }, 50);
                         } else {

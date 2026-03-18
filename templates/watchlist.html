@@ -19,7 +19,6 @@
             padding-bottom: 60px;
         }
 
-        /* ===== NAVBAR ===== */
         .navbar {
             height: 70px;
             background: #ffb3b3 !important;
@@ -67,7 +66,6 @@
             transform: translateY(-2px);
         }
 
-        /* ===== HEADER ===== */
         .page-header {
             background: #faebd7;
             padding: 35px 20px 30px;
@@ -97,14 +95,12 @@
             font-weight: 600;
         }
 
-        /* ===== MAIN CONTENT ===== */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 30px 20px;
         }
 
-        /* ===== MOVIE GRID ===== */
         .movies-grid {
             display: flex;
             flex-wrap: wrap;
@@ -112,7 +108,6 @@
             justify-content: flex-start;
         }
 
-        /* ===== MOVIE CARD ===== */
         .movie-card {
             width: 200px;
             border-radius: 12px;
@@ -131,7 +126,6 @@
             border-color: #da969b !important;
         }
 
-        /* Poster */
         .movie-poster-wrap {
             width: 100%;
             aspect-ratio: 2 / 3;
@@ -152,7 +146,6 @@
             display: block;
         }
 
-        /* Info section */
         .movie-info {
             padding: 12px;
             background: rgba(202, 127, 104, 0.4) !important;
@@ -189,7 +182,6 @@
             border-radius: 10px;
         }
 
-        /* Remove / heart icon */
         .remove-icon {
             position: absolute;
             top: 10px;
@@ -209,7 +201,6 @@
             background: white;
         }
 
-        /* ===== EMPTY STATE ===== */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -251,7 +242,6 @@
             transform: translateY(-2px);
         }
 
-        /* ===== LOADING ===== */
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -280,7 +270,6 @@
             }
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .navbar {
                 padding: 0 20px;
@@ -303,7 +292,7 @@
     <nav class="navbar">
         <div class="navbar-brand">🎬 RomCom</div>
         <div class="nav-buttons">
-            <a href="main.html" class="nav-btn">🎬 Dashboard</a>
+            <a href="/main-page" class="nav-btn">🎬 Dashboard</a>
         </div>
     </nav>
 
@@ -331,12 +320,12 @@
             const userId = localStorage.getItem("userPhone");
 
             if (!userId) {
-                window.location.href = "login.html";
+                window.location.href = "/login-page";
                 return;
             }
 
             try {
-                const res = await fetch(`http://localhost:5000/get-saved-movies/${userId}`);
+                const res = await fetch(`/get-saved-movies/${userId}`);
                 const data = await res.json();
                 const mainContent = document.getElementById("mainContent");
                 const movieCount = document.getElementById("movieCount");
@@ -348,7 +337,7 @@
                             <span class="empty-icon">💔</span>
                             <h2>Your watchlist is empty</h2>
                             <p>Head to the dashboard and start saving movies you love!</p>
-                            <a href="main.html" class="go-btn">🎬 Go to Dashboard</a>
+                            <a href="/main-page" class="go-btn">🎬 Go to Dashboard</a>
                         </div>
                     `;
                     return;
@@ -356,7 +345,6 @@
 
                 movieCount.textContent = `${data.saved_movies.length} movie${data.saved_movies.length !== 1 ? 's' : ''} saved`;
 
-                // Render cards with placeholder first
                 mainContent.innerHTML = `
                     <div class="movies-grid" id="moviesGrid">
                         ${data.saved_movies.map((movie, index) => `
@@ -375,7 +363,6 @@
                     </div>
                 `;
 
-                // Fetch posters async
                 data.saved_movies.forEach(async (movie, index) => {
                     let poster = movie.poster;
                     if (!poster || poster === "" || poster === "None") {
@@ -392,7 +379,7 @@
                         <span class="empty-icon">⚠️</span>
                         <h2>Something went wrong</h2>
                         <p>Could not load your watchlist. Please try again.</p>
-                        <a href="main.html" class="go-btn">🎬 Back to Dashboard</a>
+                        <a href="/main-page" class="go-btn">🎬 Back to Dashboard</a>
                     </div>
                 `;
             }
@@ -401,7 +388,6 @@
         async function removeMovie(title, index) {
             const userId = localStorage.getItem("userPhone");
 
-            // Animate card removal
             const card = document.getElementById(`card-${index}`);
             if (card) {
                 card.style.transition = "all 0.3s ease";
@@ -411,11 +397,10 @@
             }
 
             await fetch(
-                `http://localhost:5000/remove-from-watchlist/${userId}/${encodeURIComponent(title)}`,
+                `/remove-from-watchlist/${userId}/${encodeURIComponent(title)}`,
                 { method: "DELETE" }
             );
 
-            // Update count
             setTimeout(() => {
                 const remaining = document.querySelectorAll(".movie-card").length;
                 const movieCount = document.getElementById("movieCount");
@@ -427,7 +412,7 @@
                             <span class="empty-icon">💔</span>
                             <h2>Your watchlist is empty</h2>
                             <p>Head to the dashboard and start saving movies you love!</p>
-                            <a href="main.html" class="go-btn">🎬 Go to Dashboard</a>
+                            <a href="/main-page" class="go-btn">🎬 Go to Dashboard</a>
                         </div>
                     `;
                 }

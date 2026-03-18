@@ -193,7 +193,7 @@
 
         if (!currentUserId) {
             alert("Please login again");
-            window.location.href = "login.html";
+            window.location.href = "/login-page";
         }
 
         function initializeTropes() {
@@ -251,7 +251,7 @@
 
             try {
 
-                const response = await fetch(`http://localhost:5000/get-preferences/${currentUserId}`);
+                const response = await fetch(`/get-preferences/${currentUserId}`);
 
                 if (response.ok) {
 
@@ -291,7 +291,7 @@
 
             try {
 
-                const response = await fetch("http://localhost:5000/save-preferences", {
+                const response = await fetch("/save-preferences", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -307,18 +307,17 @@
 
                 showMessage("Preferences saved! Redirecting...", "success");
 
-                // Redirect immediately
-                window.location.href = "main.html";
+                window.location.href = "/main-page";
 
             } catch (error) {
 
                 console.error("Error:", error);
                 showMessage("Server error but redirecting...", "error");
 
-                // Redirect immediately
-                window.location.href = "main.html";
+                window.location.href = "/main-page";
             }
         }
+
         function resetSelections() {
             document.querySelectorAll("input[type='checkbox']").forEach(c => c.checked = false);
             updateSelection();

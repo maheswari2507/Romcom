@@ -374,7 +374,7 @@
                     border: none;
                     outline: none;
                 " oninput="handleSearch()" />
-            <button type="button" class="nav-btn" onclick="window.location.href='watchlist.html'">💖 Watchlist</button>
+            <button type="button" class="nav-btn" onclick="window.location.href='/watchlist-page'">💖 Watchlist</button>
 
             <button class="nav-btn edit" onclick="editPreferences()">Edit Preferences</button>
             <button class="nav-btn logout" onclick="logout()">Logout</button>
@@ -633,7 +633,7 @@
             const userPhone = localStorage.getItem('userPhone');
 
             if (!userPhone) {
-                window.location.href = 'preferences.html';
+                window.location.href = '/preferences-page';
                 return;
             }
 
@@ -646,7 +646,7 @@
         async function loadUserPreferences(userId) {
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(`http://localhost:5000/get-preferences/${userId}?t=${timestamp}`);
+                const response = await fetch(`/get-preferences/${userId}?t=${timestamp}`);
 
                 if (response.status === 404) {
                     showNoPreferences();
@@ -755,12 +755,9 @@
         }
 
 
-
-
-
         async function saveMovieToDB(userId, title, trope, poster, rating) {
             try {
-                await fetch("http://localhost:5000/save-movie", {
+                await fetch("/save-movie", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -779,7 +776,7 @@
         async function removeMovie(userId, title) {
             try {
                 await fetch(
-                    `http://localhost:5000/remove-from-watchlist/${userId}/${encodeURIComponent(title)}`,
+                    `/remove-from-watchlist/${userId}/${encodeURIComponent(title)}`,
                     { method: "DELETE" }
                 );
             } catch (error) {
@@ -790,7 +787,7 @@
 
         async function loadSavedMovies(userId) {
             try {
-                const response = await fetch(`http://localhost:5000/get-saved-movies/${userId}`);
+                const response = await fetch(`/get-saved-movies/${userId}`);
                 if (response.ok) {
                     const data = await response.json();
                     const titles = data.saved_movies.map(m => m.title);
@@ -818,13 +815,13 @@
 
         // Edit preferences
         function editPreferences() {
-            window.location.href = 'preferences.html';
+            window.location.href = '/preferences-page';
         }
 
         // Logout
         function logout() {
             localStorage.removeItem('userPhone');
-            window.location.href = 'login.html';
+            window.location.href = '/login-page';
         }
 
 
@@ -857,7 +854,7 @@
                     finalPoster = await getPosterFromTMDB(title);
                 }
 
-                // 🔥 SAVE TO DATABASE (THIS WAS MISSING)
+                // 🔥 SAVE TO DATABASE
                 await saveMovieToDB(userId, title, trope, finalPoster, rating);
 
                 savedMovies.add(title);
@@ -865,7 +862,6 @@
                 icon.textContent = "❤️";
             }
         }
-        // ✅ REPLACE your existing handleSearch() with this fixed async version
 
         async function handleSearch() {
             const query = document.getElementById("searchInput").value.toLowerCase();
